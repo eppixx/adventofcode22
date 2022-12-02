@@ -8,7 +8,7 @@ impl Outcome {
     /// what to choose based on enemy choice
     fn plan(&self, enemy: &Choice) -> Choice {
         match (enemy, self) {
-            (enemy, Outcome::Draw) => *enemy,
+            (enemy, Outcome::Draw) => enemy.clone(),
             (Choice::Rock, Outcome::Lost) => Choice::Scissor,
             (Choice::Rock, Outcome::Win) => Choice::Paper,
             (Choice::Paper, Outcome::Lost) => Choice::Rock,
@@ -30,7 +30,7 @@ impl From<char> for Outcome {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone, PartialEq, Eq)]
 enum Choice {
     Rock = 1,
     Paper = 2,
@@ -39,17 +39,16 @@ enum Choice {
 
 impl Choice {
     /// outcome based on choice of both players
-    fn play(&self, enemy: &Choice) -> Outcome {
+    fn against(&self, enemy: &Choice) -> Outcome {
         match (self, enemy) {
-            (Self::Rock, Self::Rock) => Outcome::Draw,
-            (Self::Rock, Self::Paper) => Outcome::Win,
-            (Self::Rock, Self::Scissor) => Outcome::Lost,
-            (Self::Paper, Self::Rock) => Outcome::Lost,
-            (Self::Paper, Self::Paper) => Outcome::Draw,
-            (Self::Paper, Self::Scissor) => Outcome::Win,
-            (Self::Scissor, Self::Rock) => Outcome::Win,
-            (Self::Scissor, Self::Paper) => Outcome::Lost,
-            (Self::Scissor, Self::Scissor) => Outcome::Draw,
+            (choice1, choice2) if choice1 == choice2 => Outcome::Draw,
+            (Self::Rock, Self::Paper) => Outcome::Lost,
+            (Self::Rock, Self::Scissor) => Outcome::Win,
+            (Self::Paper, Self::Rock) => Outcome::Win,
+            (Self::Paper, Self::Scissor) => Outcome::Lost,
+            (Self::Scissor, Self::Rock) => Outcome::Lost,
+            (Self::Scissor, Self::Paper) => Outcome::Win,
+            _ => unreachable!("logic error"),
         }
     }
 }
@@ -67,34 +66,29 @@ impl From<char> for Choice {
 
 pub fn main() {
     let input = include_str!("./input");
-    let games: Vec<(Choice, Choice)> = input
+
+    let score: i32 = input
         .lines()
         .map(|game| {
-            (
-                Choice::from(game.chars().next().unwrap()),
-                Choice::from(game.chars().nth(2).unwrap()),
-            )
+            let enemy = Choice::from(game.chars().next().unwrap());
+            let my_choice = Choice::from(game.chars().nth(2).unwrap());
+            let outcome = my_choice.against(&enemy);
+            // win/draw/loose + my_choice
+            outcome as i32 + my_choice as i32
         })
-        .collect();
-    let score: i32 = games
-        .iter()
-        .map(|game| game.0.play(&game.1) as i32 + game.1 as i32)
+        .sum();
+    let score_correct_plan: i32 = input
+        .lines()
+        .map(|game| {
+            let enemy = Choice::from(game.chars().next().unwrap());
+            let planned_outcome = Outcome::from(game.chars().nth(2).unwrap());
+            let planned_choice = planned_outcome.plan(&enemy);
+            // win/draw/loose + my_choice
+            planned_choice.against(&enemy) as i32 + planned_choice as i32
+        })
         .sum();
 
     println!("\nday2");
     println!("score of gameplan {}", score);
-    let games: Vec<(Choice, Outcome)> = input
-        .lines()
-        .map(|game| {
-            (
-                Choice::from(game.chars().next().unwrap()),
-                Outcome::from(game.chars().nth(2).unwrap()),
-            )
-        })
-        .collect();
-    let score: i32 = games
-        .iter()
-        .map(|game| game.0.play(&game.1.plan(&game.0)) as i32 + game.1.plan(&game.0) as i32)
-        .sum();
-    println!("score of correct gameplan {}", score);
+    println!("score of correct gameplan {}", score_correct_plan);
 }
