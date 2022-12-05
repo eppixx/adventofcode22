@@ -33,7 +33,7 @@ pub fn main() {
             let src = &str::parse::<usize>(parts.next().unwrap()).unwrap();
             let mut parts = parts.skip(1);
             let dest = &str::parse::<usize>(parts.next().unwrap()).unwrap();
-            (number.clone(), src.clone(), dest.clone())
+            (*number, *src, *dest)
         })
         .collect();
 
