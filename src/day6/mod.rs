@@ -30,16 +30,13 @@ pub fn main() {
         .windows(14)
         .enumerate()
         .find(|(_, slice)| {
-            let mut slice = slice.to_vec();
-            slice.sort();
-            let len = slice.len();
-            slice.dedup();
-            len == slice.len()
+            let set = slice.iter().collect::<std::collections::HashSet<&u8>>();
+            set.len() == slice.len()
         })
         .unwrap()
         .0;
 
     println!("\nday 6");
-    println!("start of packet marker at {}", marker + 1);
+    println!("start of packet marker at {}", marker + 4);
     println!("start of new packet marker at {}", new_marker + 14);
 }

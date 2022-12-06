@@ -1,6 +1,7 @@
 pub fn main() {
     let input = include_str!("input");
 
+    // split input into two parts
     let mut split = input.split("\n\n");
 
     let mut stacks: Vec<Vec<char>> = vec![];
@@ -10,9 +11,11 @@ pub fn main() {
             .step_by(4)
             .enumerate()
             .for_each(|(i, c)| {
+                // expand len of stacks if new stack found
                 if stacks.len() < i + 1 {
                     stacks.push(vec![]);
                 }
+                // should encounter either a char, a space or a number
                 match c {
                     ' ' => {}
                     c if ('0'..'9').contains(&c) => {}
@@ -26,6 +29,7 @@ pub fn main() {
         .unwrap()
         .lines()
         .map(|line| {
+            // line has format: ["move", "_", "from", "_", "to"]
             let parts = line.split(' ');
             let mut parts = parts.skip(1);
             let number = &str::parse::<usize>(parts.next().unwrap()).unwrap();
