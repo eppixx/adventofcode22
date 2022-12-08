@@ -23,44 +23,38 @@ pub fn main() {
             }
             ["$", "cd", folder] => pwd.push(String::from(*folder)),
             ["$", "ls"] => loop {
+                // peek next line if it still belongs to ls output
                 match lines.peek() {
                     None => break,
                     Some(peeks) => {
                         let split_line: Vec<&str> = peeks.split(' ').collect();
                         match split_line[..] {
+                            // line is folder
                             ["dir", folder] => {
-                                lines.next();
                                 let folder = Node::Folder(String::from(folder));
-                                match fs.contains_key(&pwd) {
-                                    false => {
+                                match fs.get_mut(&pwd) {
+                                    None => {
                                         fs.insert(pwd.clone(), vec![folder]);
                                     }
-                                    true => {
-                                        let mut v = fs.get(&pwd).unwrap().clone();
-                                        v.push(folder);
-                                        fs.insert(pwd.clone(), v.to_vec());
-                                    }
+                                    Some(v) => v.push(folder),
                                 }
                             }
+                            // line is file
                             [number, name] => {
-                                lines.next();
                                 let file = Node::File(
                                     String::from(name),
                                     str::parse::<usize>(number).unwrap(),
                                 );
-                                match fs.contains_key(&pwd) {
-                                    false => {
+                                match fs.get_mut(&pwd) {
+                                    None => {
                                         fs.insert(pwd.clone(), vec![file]);
                                     }
-                                    true => {
-                                        let mut v = fs.get(&pwd).unwrap().clone();
-                                        v.push(file);
-                                        fs.insert(pwd.clone(), v.to_vec());
-                                    }
+                                    Some(v) => v.push(file),
                                 }
                             }
                             _ => break,
                         }
+                        lines.next();
                     }
                 }
             },
