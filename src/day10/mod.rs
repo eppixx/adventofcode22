@@ -68,7 +68,7 @@ pub fn main() {
             Instruction::Addx(number) => {
                 let pipeline = register + number;
                 match register - (cycle % 40) {
-                    i if i >= -1 && i <= 1 => {
+                    i if (-1..=1).contains(&i) => {
                         crt[(cycle - 1) as usize] = '#';
                     }
                     _ => {}
@@ -79,7 +79,7 @@ pub fn main() {
             }
         }
         match register - (cycle % 40) {
-            i if i >= -1 && i <= 1 => {
+            i if (-1..=1).contains(&i) => {
                 crt[(cycle - 1) as usize] = '#';
             }
             _ => {}
